@@ -45,7 +45,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
-      - ./db:/var/lib/mysql
+      - ../db:/var/lib/mysql
     networks:
       - home-server-back
 
