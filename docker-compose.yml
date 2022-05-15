@@ -1,0 +1,65 @@
+version: "3.8"
+
+services:
+  home-server-back-app:
+    container_name: home-server-back-app
+    restart: always
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
+      APP_SERVER_PORT: ${APP_SERVER_PORT}
+      APP_TOKEN: ${APP_TOKEN}
+    build:
+      context: .
+      dockerfile: home-server-back.Dockerfile
+      args:
+        APP_SERVER_PORT: ${APP_SERVER_PORT}
+
+    networks:
+      - home-server-back
+
+  home-server-back-duckdns:
+    container_name: home-server-back-duckdns
+    restart: always
+    image: ghcr.io/linuxserver/duckdns
+    environment:
+      PUID: ${PUID}
+      PGID: ${PGID}
+      TZ: ${TZ}
+      SUBDOMAINS: ${SUBDOMAINS}
+      TOKEN: ${TOKEN}
+      LOG_FILE: ${LOG_FILE}
+    networks:
+      - home-server-back
+
+  home-server-back-db:
+    container_name: home-server-back-db
+    restart: always
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+      - home-server-back
+
+  home-server-back-phpmyadmin:
+    container_name: home-server-back-phpmyadmin
+    restart: always
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: home-server-back-db
+    depends_on:
+      - home-server-back-db
+    networks:
+      - home-server-back
+
+networks:
+  home-server-back:
+    name: home-server-back
